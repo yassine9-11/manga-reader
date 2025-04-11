@@ -108,7 +108,7 @@
 
         .reader-container {
             margin-top: 56px;
-            margin-bottom: 70px;
+            margin-bottom: 20px;
         }
 
         .page-container {
@@ -149,52 +149,73 @@
         }
 
         .mobile-menu {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            left: 0;
+            position: relative;
             background: var(--card-bg);
             box-shadow: 0 -2px 8px var(--card-shadow);
             display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            z-index: 1000;
-            transition: transform 0.3s ease;
+            justify-content: space-between;
+            padding: 12px 16px;
+            margin: 20px 0;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
         }
 
         .mobile-menu.hidden {
-            transform: translateY(100%);
+            transform: none;
         }
 
         .nav-button {
             color: var(--text-color);
             text-decoration: none;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 4px;
-            font-size: 0.8em;
+            gap: 8px;
+            font-size: 0.9em;
             padding: 8px 16px;
             border-radius: 8px;
-            background: var(--card-bg);
+            background: rgba(0, 0, 0, 0.05);
             border: none;
             cursor: pointer;
-            min-width: 80px;
+            min-width: 90px;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .nav-button {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .nav-button.disabled {
             opacity: 0.5;
             pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .nav-button:not(.disabled):active {
+            transform: scale(0.95);
         }
 
         .nav-button i {
-            font-size: 1.5em;
+            font-size: 1.1em;
+        }
+
+        .nav-button.chapters {
+            background: var(--header-bg);
+            color: white;
+        }
+
+        @media (max-width: 380px) {
+            .nav-button {
+                padding: 8px 12px;
+                min-width: 80px;
+                font-size: 0.85em;
+            }
         }
 
         .tap-zones {
             position: fixed;
             top: 56px;
-            bottom: 70px;
+            bottom: 0;
             left: 0;
             right: 0;
             display: flex;
@@ -251,40 +272,40 @@
         {% for image in images %}
         <div class="page-container">
             <div class="loading-placeholder"></div>
-            <img class="page-img" data-src="{{ image }}" alt="Page {{ loop.index }}">
+            <img class="page-img" src="{{ image }}" alt="Page {{ loop.index }}">
         </div>
         {% endfor %}
-    </div>
 
-    <div class="mobile-menu">
-        {% if next_chapter %}
-        <button onclick="window.location.href='/read/{{ next_chapter.url }}'" class="nav-button">
-            <i class="fas fa-chevron-right"></i>
-            التالي
-        </button>
-        {% else %}
-        <button class="nav-button disabled">
-            <i class="fas fa-chevron-right"></i>
-            التالي
-        </button>
-        {% endif %}
+        <div class="mobile-menu">
+            {% if next_chapter %}
+            <button onclick="window.location.href='/read/{{ next_chapter.url }}'" class="nav-button">
+                <i class="fas fa-chevron-right"></i>
+                <span>التالي</span>
+            </button>
+            {% else %}
+            <button class="nav-button disabled">
+                <i class="fas fa-chevron-right"></i>
+                <span>التالي</span>
+            </button>
+            {% endif %}
 
-        <a href="/manga/{{ manga_url }}" class="nav-button">
-            <i class="fas fa-list"></i>
-            الفصول
-        </a>
+            <a href="/manga/{{ manga_url }}" class="nav-button chapters">
+                <i class="fas fa-list"></i>
+                <span>الفصول</span>
+            </a>
 
-        {% if prev_chapter %}
-        <button onclick="window.location.href='/read/{{ prev_chapter.url }}'" class="nav-button">
-            <i class="fas fa-chevron-left"></i>
-            السابق
-        </button>
-        {% else %}
-        <button class="nav-button disabled">
-            <i class="fas fa-chevron-left"></i>
-            السابق
-        </button>
-        {% endif %}
+            {% if prev_chapter %}
+            <button onclick="window.location.href='/read/{{ prev_chapter.url }}'" class="nav-button">
+                <i class="fas fa-chevron-left"></i>
+                <span>السابق</span>
+            </button>
+            {% else %}
+            <button class="nav-button disabled">
+                <i class="fas fa-chevron-left"></i>
+                <span>السابق</span>
+            </button>
+            {% endif %}
+        </div>
     </div>
 
     <script>
@@ -321,61 +342,85 @@
         const themeToggle = document.querySelector('.theme-toggle i');
         themeToggle.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 
-        // Lazy loading images
+        // Handle image loading
         const images = document.querySelectorAll('.page-img');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.onload = () => {
-                        img.classList.add('loaded');
-                        const placeholder = img.previousElementSibling;
-                        if (placeholder) {
-                            placeholder.style.display = 'none';
-                        }
-                    };
-                    observer.unobserve(img);
+        images.forEach(img => {
+            img.onload = () => {
+                img.classList.add('loaded');
+                const placeholder = img.previousElementSibling;
+                if (placeholder) {
+                    placeholder.style.display = 'none';
                 }
-            });
-        }, {
-            rootMargin: '50px 0px'
+            };
         });
 
-        images.forEach(img => imageObserver.observe(img));
-
-        // UI visibility
+        // Update UI visibility to only handle header
         let isUIVisible = true;
         let uiTimeout;
+        let lastScrollY = window.scrollY;
+        let lastScrollTime = Date.now();
+
+        function showUI() {
+            isUIVisible = true;
+            const header = document.querySelector('.header');
+            header.classList.remove('hidden');
+            
+            // Reset auto-hide timeout
+            clearTimeout(uiTimeout);
+            uiTimeout = setTimeout(() => {
+                header.classList.add('hidden');
+                isUIVisible = false;
+            }, 3000);
+        }
 
         function toggleUI() {
             isUIVisible = !isUIVisible;
             const header = document.querySelector('.header');
-            const menu = document.querySelector('.mobile-menu');
-            
             header.classList.toggle('hidden', !isUIVisible);
-            menu.classList.toggle('hidden', !isUIVisible);
-        }
-
-        function autoHideUI() {
-            clearTimeout(uiTimeout);
-            isUIVisible = true;
-            const header = document.querySelector('.header');
-            const menu = document.querySelector('.mobile-menu');
             
-            header.classList.remove('hidden');
-            menu.classList.remove('hidden');
-            
-            uiTimeout = setTimeout(() => {
-                if (isUIVisible) {
+            // If showing header, set auto-hide timeout
+            if (isUIVisible) {
+                clearTimeout(uiTimeout);
+                uiTimeout = setTimeout(() => {
                     header.classList.add('hidden');
-                    menu.classList.add('hidden');
                     isUIVisible = false;
-                }
-            }, 3000);
+                }, 3000);
+            }
         }
 
-        // Navigation
+        // Add click event listener to the entire body
+        document.body.addEventListener('click', (e) => {
+            // Don't trigger if clicking on navigation buttons or the header itself
+            if (!e.target.closest('.mobile-menu') && !e.target.closest('.header')) {
+                toggleUI();
+            }
+        });
+
+        // Add scroll event listener to show header when scrolling up
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const currentTime = Date.now();
+            
+            // Only trigger if enough time has passed since last scroll event (debounce)
+            if (currentTime - lastScrollTime > 100) {
+                // Show header when scrolling up
+                if (currentScrollY < lastScrollY) {
+                    showUI();
+                }
+                lastScrollTime = currentTime;
+            }
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        // Initialize header as hidden
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.querySelector('.header');
+            header.classList.add('hidden');
+            isUIVisible = false;
+            lastScrollY = window.scrollY;
+        });
+
+        // Navigation functions
         function navigatePrevious() {
             const prevButton = document.querySelector('.nav-button:not(.disabled) i.fa-chevron-right');
             if (prevButton) {
@@ -398,21 +443,6 @@
                 tapHint.classList.remove('show');
             }, 3000);
         }, 1000);
-
-        // Auto-hide UI after loading
-        document.addEventListener('DOMContentLoaded', () => {
-            autoHideUI();
-        });
-
-        // Show UI on scroll
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const currentScrollY = window.scrollY;
-            if (Math.abs(currentScrollY - lastScrollY) > 30) {
-                autoHideUI();
-                lastScrollY = currentScrollY;
-            }
-        });
     </script>
 
     <!-- Default Statcounter code for arabmanga arabmanga.dpdns.org -->

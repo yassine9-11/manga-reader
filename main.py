@@ -119,7 +119,19 @@ def scrape_manga_details(url):
     soup = BeautifulSoup(response.text, 'html.parser')
     
     # Basic details
-    title = soup.select_one("div.post-title h1").text.strip()
+    title_element = soup.select_one("div.post-title h1")
+    arabic_title = title_element.text.strip()
+    
+    # Try to find English title in alternative titles section
+    alternative_titles_div = soup.select_one("div.post-content_item:has(div.summary-heading:contains('عناوين أخرى'))")
+    english_title = None
+    if alternative_titles_div:
+        alternative_titles = alternative_titles_div.select_one("div.summary-content").text.strip()
+        # Look for English title in alternative titles (usually in parentheses)
+        english_match = re.search(r'\((.*?)\)', alternative_titles)
+        if english_match:
+            english_title = english_match.group(1).strip()
+    
     thumbnail = soup.select_one("div.summary_image img")['src']
     description = soup.select_one("div.description-summary div.summary__content").text.strip()
     
@@ -142,7 +154,8 @@ def scrape_manga_details(url):
             })
     
     return {
-        'title': title,
+        'title': arabic_title,
+        'english_title': english_title,
         'thumbnail': thumbnail,
         'description': description,
         'genres': genres,
@@ -283,6 +296,4 @@ def favorites():
     return render_template(template)
 
 if __name__ == '__main__':
-    app.run()
-
-app = app
+    app.run(host='0.0.0.0', port=5000, debug=True)

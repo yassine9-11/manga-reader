@@ -146,6 +146,8 @@
             text-decoration: none;
             color: var(--text-color);
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .manga-card:hover {
@@ -167,14 +169,28 @@
         .manga-info {
             padding: 15px;
             color: var(--text-color);
+            background: rgba(0, 0, 0, 0.02);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        [data-theme="dark"] .manga-info {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .manga-title {
             font-size: 1.1em;
-            margin-bottom: 5px;
-            font-weight: 600;
+            margin: 0;
+            font-weight: 500;
             transition: color var(--transition-speed) ease;
             color: var(--text-color);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            direction: ltr;
+            text-align: left;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
         .loading-placeholder {
@@ -307,19 +323,16 @@
     </div>
 
     <div class="manga-grid">
-        {% for manga in mangas %}
-        <div class="manga-card">
-            <button class="favorite-toggle" onclick="toggleFavorite(this, '{{ manga.url }}', '{{ manga.title }}', '{{ manga.thumbnail }}')">
-                <i class="far fa-heart"></i>
-            </button>
-            <a href="{{ url_for('manga_detail', manga_url=manga.url) }}">
-                <img class="manga-cover" src="{{ manga.thumbnail }}" alt="{{ manga.title }}">
+        {% if mangas %}
+            {% for manga in mangas %}
+            <a href="{{ url_for('manga_detail', manga_url=manga.url) }}" class="manga-card">
+                <img class="manga-cover" src="{{ manga.thumbnail }}" alt="{{ manga.title }}" loading="lazy">
                 <div class="manga-info">
-                    <h3 class="manga-title">{{ manga.title }}</h3>
+                    <h2 class="manga-title">{{ manga.title.replace('?', '') + '?' if '?' in manga.title else manga.title }}</h2>
                 </div>
             </a>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        {% endif %}
     </div>
 
     <script>
