@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المفضلة - مانجا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0,0,0,0.1);
+            --header-bg: linear-gradient(135deg, #6c5ce7, #a363d9);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d2d2d;
+            --card-shadow: rgba(0,0,0,0.3);
+            --header-bg: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            transition: background-color var(--transition-speed) ease, 
+                        color var(--transition-speed) ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+
+        .title {
+            font-size: 2em;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title i {
+            color: #ff6b6b;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .manga-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            transition: transform var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .manga-content {
+            position: relative;
+        }
+
+        .manga-link {
+            display: block;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .manga-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .manga-cover {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .manga-card:hover .manga-cover {
+            transform: scale(1.05);
+        }
+
+        .manga-info {
+            padding: 15px;
+        }
+
+        .manga-title {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .remove-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .remove-button i {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .remove-button:hover {
+            background: #ff6b6b;
+            transform: scale(1.1);
+        }
+
+        .remove-button:hover i {
+            transform: scale(1.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h2 {
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .browse-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: var(--header-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .browse-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .manga-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .manga-cover {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">
+            <i class="fas fa-heart"></i>
+            المفضلة
+        </h1>
+        <a href="{{ url_for('home') }}" class="back-button">
+            <i class="fas fa-arrow-right"></i>
+            الرئيسية
+        </a>
+    </div>
+
+    <div id="mangaGrid" class="manga-grid">
+        <!-- Will be populated by JavaScript -->
+    </div>
+
+    <script>
+        // Theme handling
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        // Get favorites from localStorage
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const mangaGrid = document.getElementById('mangaGrid');
+
+        // Display favorites or empty state
+        if (favorites.length > 0) {
+            favorites.forEach(manga => {
+                const mangaCard = document.createElement('div');
+                mangaCard.className = 'manga-card';
+                mangaCard.innerHTML = `
+                    <button class="remove-button" onclick="removeFavorite(this, '${manga.url}')">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    <a href="/manga/${manga.url}" class="manga-link">
+                        <img class="manga-cover" src="${manga.thumbnail}" alt="${manga.title}">
+                        <div class="manga-info">
+                            <h3 class="manga-title">${manga.title}</h3>
+                        </div>
+                    </a>
+                `;
+                mangaGrid.appendChild(mangaCard);
+            });
+        } else {
+            mangaGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="far fa-heart"></i>
+                    <h2>لا توجد مانجا في المفضلة</h2>
+                    <p>ابدأ بإضافة المانجا المفضلة لديك</p>
+                    <a href="/" class="browse-button">تصفح المانجا</a>
+                </div>
+            `;
+        }
+
+        // Remove from favorites
+        function removeFavorite(button, mangaUrl) {
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const newFavorites = favorites.filter(item => item.url !== mangaUrl);
+            localStorage.setItem('favorites', JSON.stringify(newFavorites));
+            
+            // Animate removal
+            const card = button.closest('.manga-card');
+            card.style.transition = 'all 0.3s ease';
+            card.style.transform = 'scale(0.9)';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                card.remove();
+                // Show empty state if no favorites left
+                if (newFavorites.length === 0) {
+                    mangaGrid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="far fa-heart"></i>
+                            <h2>لا توجد مانجا في المفضلة</h2>
+                            <p>ابدأ بإضافة المانجا المفضلة لديك</p>
+                            <a href="/" class="browse-button">تصفح المانجا</a>
+                        </div>
+                    `;
+                }
+            }, 300);
+        }
+    </script>
+
+    <!-- Default Statcounter code for arabmanga arabmanga.dpdns.org -->
+    <script type="text/javascript">
+    var sc_project=13084401; 
+    var sc_invisible=1; 
+    var sc_security="2950abc6"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+    <noscript><div class="statcounter"><a title="web counter"
+    href="https://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="https://c.statcounter.com/13084401/0/2950abc6/1/"
+    alt="web counter"
+    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+    <!-- End of Statcounter Code -->
+</body>
+</html> 

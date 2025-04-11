@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البحث - مانجا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0,0,0,0.1);
+            --header-bg: linear-gradient(135deg, #6c5ce7, #a363d9);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d2d2d;
+            --card-shadow: rgba(0,0,0,0.3);
+            --header-bg: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed) ease, 
+                        color var(--transition-speed) ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1000;
+            background: var(--card-bg);
+            box-shadow: 0 2px 8px var(--card-shadow);
+            padding: 10px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            padding: 8px;
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            box-shadow: 0 2px 4px var(--card-shadow);
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--card-shadow);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        .search-button {
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-shadow);
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .theme-toggle {
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-shadow);
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .search-content {
+            margin-top: 56px;
+            margin-bottom: 70px;
+            padding: 15px;
+        }
+
+        .recent-searches {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px var(--card-shadow);
+        }
+
+        .recent-searches-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-button {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 4px 8px;
+        }
+
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .recent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .recent-item-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .recent-item i {
+            font-size: 1.1em;
+            opacity: 0.7;
+        }
+
+        .remove-recent {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 4px;
+            opacity: 0.5;
+        }
+
+        .remove-recent:hover {
+            opacity: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--card-shadow);
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h2 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background: var(--card-bg);
+            box-shadow: 0 -2px 8px var(--card-shadow);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .mobile-menu-item {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8em;
+        }
+
+        .mobile-menu-item i {
+            font-size: 1.5em;
+        }
+
+        .mobile-menu-item.active {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <a href="{{ url_for('home') }}" class="back-button">
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <div class="search-container">
+                <form action="{{ url_for('home') }}" method="get" class="search-form">
+                    <input type="text" 
+                           name="q" 
+                           placeholder="ابحث عن مانجا..." 
+                           value="{{ query }}" 
+                           class="search-input" 
+                           autocomplete="off"
+                           autofocus>
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-sun"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="search-content">
+        <div class="recent-searches">
+            <div class="recent-searches-title">
+                <span>عمليات البحث الأخيرة</span>
+                <button class="clear-button" onclick="clearRecentSearches()">
+                    مسح الكل
+                </button>
+            </div>
+            <div class="recent-list" id="recentList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-menu">
+        <a href="{{ url_for('home') }}" class="mobile-menu-item">
+            <i class="fas fa-home"></i>
+            الرئيسية
+        </a>
+        <a href="{{ url_for('search') }}" class="mobile-menu-item active">
+            <i class="fas fa-search"></i>
+            البحث
+        </a>
+        <a href="{{ url_for('favorites') }}" class="mobile-menu-item">
+            <i class="fas fa-heart"></i>
+            المفضلة
+        </a>
+    </div>
+
+    <script>
+        // Theme handling
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            
+            // Toggle sun/moon icon
+            const themeToggle = document.querySelector('.theme-toggle i');
+            themeToggle.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Restore theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        const themeToggle = document.querySelector('.theme-toggle i');
+        themeToggle.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
+        // Recent searches functionality
+        function loadRecentSearches() {
+            const recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+            const recentList = document.getElementById('recentList');
+
+            if (recentSearches.length === 0) {
+                recentList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h2>لا توجد عمليات بحث سابقة</h2>
+                        <p>ستظهر عمليات البحث الأخيرة هنا</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recentList.innerHTML = recentSearches.map(query => `
+                <div class="recent-item">
+                    <a href="/?q=${encodeURIComponent(query)}" class="recent-item-text">
+                        <i class="fas fa-history"></i>
+                        ${query}
+                    </a>
+                    <button class="remove-recent" onclick="removeRecentSearch('${query}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addRecentSearch(query) {
+            if (!query) return;
+            let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+            // Remove if exists and add to front
+            recentSearches = recentSearches.filter(q => q !== query);
+            recentSearches.unshift(query);
+            // Keep only last 10 searches
+            recentSearches = recentSearches.slice(0, 10);
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            loadRecentSearches();
+        }
+
+        function removeRecentSearch(query) {
+            let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+            recentSearches = recentSearches.filter(q => q !== query);
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            loadRecentSearches();
+        }
+
+        function clearRecentSearches() {
+            localStorage.setItem('recentSearches', '[]');
+            loadRecentSearches();
+        }
+
+        // Handle search form submission
+        document.querySelector('.search-form').addEventListener('submit', (e) => {
+            const query = e.target.querySelector('input[name="q"]').value.trim();
+            if (query) {
+                addRecentSearch(query);
+            }
+        });
+
+        // Initial load
+        loadRecentSearches();
+    </script>
+<!-- Default Statcounter code for arabmanga
+arabmanga.dpdns.org -->
+<script type="text/javascript">
+    var sc_project=13084401; 
+    var sc_invisible=1; 
+    var sc_security="2950abc6"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+    <noscript><div class="statcounter"><a title="web counter"
+    href="https://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="https://c.statcounter.com/13084401/0/2950abc6/1/"
+    alt="web counter"
+    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+    <!-- End of Statcounter Code -->
+</body>
+</html> 

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مانجا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0,0,0,0.1);
+            --header-bg: linear-gradient(135deg, #6c5ce7, #a363d9);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d2d2d;
+            --card-shadow: rgba(0,0,0,0.3);
+            --header-bg: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed) ease, 
+                        color var(--transition-speed) ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1000;
+            background: var(--card-bg);
+            box-shadow: 0 2px 8px var(--card-shadow);
+            padding: 10px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 1.5em;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--card-shadow);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        .search-button {
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-shadow);
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .theme-toggle {
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-shadow);
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+            margin-top: 60px;
+            margin-bottom: 70px;
+        }
+
+        .manga-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .manga-cover {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .manga-info {
+            padding: 10px;
+        }
+
+        .manga-title {
+            font-size: 0.9em;
+            margin: 0;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background: var(--card-bg);
+            box-shadow: 0 -2px 8px var(--card-shadow);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .mobile-menu-item {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8em;
+        }
+
+        .mobile-menu-item i {
+            font-size: 1.5em;
+        }
+
+        .mobile-menu-item.active {
+            color: #ff6b6b;
+        }
+
+        .loading-placeholder {
+            background: var(--card-bg);
+            border-radius: 8px;
+            height: 280px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1 class="title">مانجا</h1>
+            <div class="search-container">
+                <form action="{{ url_for('home') }}" method="get" class="search-form">
+                    <input type="text" name="q" placeholder="ابحث عن مانجا..." value="{{ query }}" class="search-input">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-sun"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="manga-grid">
+        {% if mangas %}
+            {% for manga in mangas %}
+            <a href="{{ url_for('manga_detail', manga_url=manga.url) }}" class="manga-card">
+                <img class="manga-cover" src="{{ manga.thumbnail }}" alt="{{ manga.title }}" loading="lazy">
+                <div class="manga-info">
+                    <h2 class="manga-title">{{ manga.title }}</h2>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="loading-placeholder"></div>
+            <div class="loading-placeholder"></div>
+            <div class="loading-placeholder"></div>
+            <div class="loading-placeholder"></div>
+        {% endif %}
+    </div>
+
+    <div class="mobile-menu">
+        <a href="{{ url_for('home') }}" class="mobile-menu-item active">
+            <i class="fas fa-home"></i>
+            الرئيسية
+        </a>
+        <a href="{{ url_for('search') }}" class="mobile-menu-item">
+            <i class="fas fa-search"></i>
+            البحث
+        </a>
+        <a href="{{ url_for('favorites') }}" class="mobile-menu-item">
+            <i class="fas fa-heart"></i>
+            المفضلة
+        </a>
+    </div>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            
+            // Toggle sun/moon icon
+            const themeToggle = document.querySelector('.theme-toggle i');
+            themeToggle.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Restore theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        const themeToggle = document.querySelector('.theme-toggle i');
+        themeToggle.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
+        // Lazy loading for images
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('loading');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            images.forEach(img => {
+                img.classList.add('loading');
+                img.dataset.src = img.src;
+                img.src = '';
+                imageObserver.observe(img);
+            });
+        });
+    </script>
+
+    <!-- Default Statcounter code for arabmanga arabmanga.dpdns.org -->
+    <script type="text/javascript">
+    var sc_project=13084401; 
+    var sc_invisible=1; 
+    var sc_security="2950abc6"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+    <noscript><div class="statcounter"><a title="web counter"
+    href="https://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="https://c.statcounter.com/13084401/0/2950abc6/1/"
+    alt="web counter"
+    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+    <!-- End of Statcounter Code -->
+</body>
+</html> 

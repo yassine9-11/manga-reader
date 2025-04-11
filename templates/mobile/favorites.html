@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المفضلة - مانجا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0,0,0,0.1);
+            --header-bg: linear-gradient(135deg, #6c5ce7, #a363d9);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d2d2d;
+            --card-shadow: rgba(0,0,0,0.3);
+            --header-bg: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed) ease, 
+                        color var(--transition-speed) ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1000;
+            background: var(--card-bg);
+            box-shadow: 0 2px 8px var(--card-shadow);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 1.5em;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .title i {
+            color: #ff6b6b;
+        }
+
+        .back-button {
+            padding: 8px;
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            box-shadow: 0 2px 4px var(--card-shadow);
+        }
+
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+            margin-top: 60px;
+        }
+
+        .manga-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            position: relative;
+        }
+
+        .manga-content {
+            position: relative;
+        }
+
+        .manga-link {
+            display: block;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .manga-cover {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .manga-info {
+            padding: 10px;
+        }
+
+        .manga-title {
+            font-size: 0.9em;
+            margin: 0;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .remove-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            font-size: 16px;
+        }
+
+        .remove-button:hover {
+            background: #ff6b6b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            margin: 70px 10px 10px 10px;
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h2 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .browse-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--header-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background: var(--card-bg);
+            box-shadow: 0 -2px 8px var(--card-shadow);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .mobile-menu-item {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8em;
+        }
+
+        .mobile-menu-item i {
+            font-size: 1.5em;
+        }
+
+        .mobile-menu-item.active {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">
+            <i class="fas fa-heart"></i>
+            المفضلة
+        </h1>
+        <a href="{{ url_for('home') }}" class="back-button">
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div id="mangaGrid" class="manga-grid">
+        <!-- Will be populated by JavaScript -->
+    </div>
+
+    <div class="mobile-menu">
+        <a href="{{ url_for('home') }}" class="mobile-menu-item">
+            <i class="fas fa-home"></i>
+            الرئيسية
+        </a>
+        <a href="{{ url_for('search') }}" class="mobile-menu-item">
+            <i class="fas fa-search"></i>
+            البحث
+        </a>
+        <a href="{{ url_for('favorites') }}" class="mobile-menu-item active">
+            <i class="fas fa-heart"></i>
+            المفضلة
+        </a>
+    </div>
+
+    <script>
+        // Theme handling
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        // Get favorites from localStorage
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const mangaGrid = document.getElementById('mangaGrid');
+
+        // Display favorites or empty state
+        if (favorites.length > 0) {
+            favorites.forEach(manga => {
+                const card = document.createElement('div');
+                card.className = 'manga-card';
+                card.innerHTML = `
+                    <div class="manga-content">
+                        <button class="remove-button" onclick="removeFromFavorites(event, '${manga.url}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <a href="/manga/${manga.url}" class="manga-link">
+                            <img class="manga-cover" src="${manga.thumbnail}" alt="${manga.title}">
+                            <div class="manga-info">
+                                <h2 class="manga-title">${manga.title}</h2>
+                            </div>
+                        </a>
+                    </div>
+                `;
+                mangaGrid.appendChild(card);
+            });
+        } else {
+            mangaGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-heart-broken"></i>
+                    <h2>لا توجد مانجا في المفضلة</h2>
+                    <p>أضف بعض المانجا المفضلة لديك لتظهر هنا</p>
+                    <a href="/" class="browse-button">تصفح المانجا</a>
+                </div>
+            `;
+        }
+
+        // Function to remove manga from favorites
+        function removeFromFavorites(event, mangaUrl) {
+            event.preventDefault(); // Prevent any parent events
+            event.stopPropagation(); // Stop the click from reaching the link
+            
+            let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            favorites = favorites.filter(manga => manga.url !== mangaUrl);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            location.reload();
+        }
+    </script>
+
+    <!-- Default Statcounter code for arabmanga arabmanga.dpdns.org -->
+    <script type="text/javascript">
+    var sc_project=13084401; 
+    var sc_invisible=1; 
+    var sc_security="2950abc6"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+    <noscript><div class="statcounter"><a title="web counter"
+    href="https://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="https://c.statcounter.com/13084401/0/2950abc6/1/"
+    alt="web counter"
+    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+    <!-- End of Statcounter Code -->
+</body>
+</html> 

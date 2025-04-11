@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ manga.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0,0,0,0.1);
+            --header-bg: linear-gradient(135deg, #6c5ce7, #a363d9);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d2d2d;
+            --card-shadow: rgba(0,0,0,0.3);
+            --header-bg: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            transition: background-color var(--transition-speed) ease, 
+                        color var(--transition-speed) ease;
+        }
+
+        .controls {
+            position: sticky;
+            top: 20px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            z-index: 100;
+        }
+
+        .back-button, .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            border: none;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            cursor: pointer;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover, .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+
+        .back-button svg {
+            margin-left: 8px;
+            transform: scaleX(-1);
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 2px 8px var(--card-shadow);
+            border: none;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.5s ease;
+        }
+
+        .theme-toggle:hover svg {
+            transform: rotate(45deg);
+        }
+
+        .manga-header {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .manga-header:hover {
+            transform: translateY(-2px);
+        }
+
+        .manga-cover {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            transition: transform var(--transition-speed) ease;
+            will-change: transform;
+        }
+
+        .manga-cover:hover {
+            transform: scale(1.02);
+        }
+
+        .manga-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .manga-title {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .manga-metadata {
+            margin-bottom: 20px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .metadata-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .metadata-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-left: 8px;
+        }
+
+        .manga-genres-section {
+            margin-bottom: 20px;
+        }
+
+        .genres-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .manga-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .genre-tag {
+            background: var(--header-bg);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .genre-tag:hover {
+            transform: translateY(-2px);
+        }
+
+        .manga-description-section {
+            margin-bottom: 30px;
+        }
+
+        .description-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .manga-description {
+            line-height: 1.7;
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .chapter-list {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .chapter-list:hover {
+            transform: translateY(-2px);
+        }
+
+        .chapter-list h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .chapter-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-5px);
+        }
+
+        .chapter-item.read {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .chapter-title {
+            flex: 1;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .read-label {
+            margin-left: 10px;
+            font-size: 0.8em;
+            color: var(--accent-color);
+            opacity: 0.7;
+        }
+
+        .favorite-button {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ccc;
+            transition: all 0.3s ease;
+            padding: 10px;
+            margin: 10px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .favorite-button:hover {
+            color: #ff6b6b;
+        }
+
+        .favorite-button.active {
+            color: #ff6b6b;
+        }
+
+        .favorite-button i {
+            transition: all 0.3s ease;
+        }
+
+        .favorite-button .favorite-icon {
+            display: none;
+        }
+
+        .favorite-button .unfavorite-icon {
+            display: inline-block;
+        }
+
+        .favorite-button.active .favorite-icon {
+            display: inline-block;
+        }
+
+        .favorite-button.active .unfavorite-icon {
+            display: none;
+        }
+
+        .favorite-button:hover i {
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .manga-header {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .manga-cover {
+                height: 360px;
+                width: 100%;
+                max-width: 280px;
+                margin: 0 auto;
+            }
+
+            .manga-title {
+                font-size: 2em;
+            }
+
+            .chapters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 10px;
+                background: var(--card-bg);
+                box-shadow: 0 2px 8px var(--card-shadow);
+                margin-bottom: 0;
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <a href="{{ url_for('home') }}" class="back-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            العودة
+        </a>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="manga-header">
+        <img class="manga-cover" 
+             src="{{ manga.thumbnail }}" 
+             alt="{{ manga.title }}"
+             loading="lazy">
+        <div class="manga-info">
+            <h1 class="manga-title">{{ manga.title }}</h1>
+            <button class="favorite-button" id="favoriteButton">
+                <i class="fas fa-heart favorite-icon"></i>
+                <i class="far fa-heart unfavorite-icon"></i>
+                <span class="favorite-text">إضافة للمفضلة</span>
+            </button>
+            <div class="manga-genres-section">
+                <h3 class="genres-title">التصنيفات</h3>
+                <div class="manga-genres">
+                    {% for genre in manga.genres %}
+                    <span class="genre-tag">{{ genre }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="manga-description-section">
+                <h3 class="description-title">القصة</h3>
+                <div class="manga-description">
+                    {{ manga.description }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="favorites-section">
+        <h2>المفضلة</h2>
+        <div class="favorites-list">
+            <!-- Favorite items will be dynamically added here -->
+        </div>
+    </div>
+
+    <div class="chapter-list">
+        <h2>الفصول</h2>
+        <div class="chapters-grid">
+            {% for chapter in manga.chapters %}
+            <a href="{{ url_for('read_chapter', chapter_url=chapter.url) }}" class="chapter-item">
+                <div class="chapter-title">{{ chapter.title }}</div>
+                <div class="chapter-date">{{ chapter.date }}</div>
+                <span class="read-label">مقروء</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            
+            // Toggle sun/moon icons
+            const sunIcon = document.querySelector('.sun-icon');
+            const moonIcon = document.querySelector('.moon-icon');
+            sunIcon.style.display = isDark ? 'block' : 'none';
+            moonIcon.style.display = isDark ? 'none' : 'block';
+        }
+
+        // Restore theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            document.querySelector('.sun-icon').style.display = 'none';
+            document.querySelector('.moon-icon').style.display = 'block';
+        }
+
+        // Lazy loading for images
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('loading');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            images.forEach(img => {
+                img.classList.add('loading');
+                img.dataset.src = img.src;
+                img.src = '';
+                imageObserver.observe(img);
+            });
+        });
+
+        // Smooth scroll to top
+        document.querySelector('.back-button').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            setTimeout(() => {
+                window.location.href = e.target.closest('a').href;
+            }, 300);
+        });
+
+        // Favorites functionality
+        const favoriteButton = document.getElementById('favoriteButton');
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+        // Current manga data
+        const currentManga = {
+            title: '{{ manga.title }}',
+            url: '{{ manga_url }}',
+            thumbnail: '{{ manga.thumbnail }}'
+        };
+
+        // Check if current manga is in favorites
+        const isFavorite = favorites.some(m => m.url === currentManga.url);
+        if (isFavorite) {
+            favoriteButton.classList.add('active');
+            favoriteButton.querySelector('.favorite-text').textContent = 'إزالة من المفضلة';
+        }
+
+        // Handle favorite button click
+        favoriteButton.addEventListener('click', () => {
+            const isFavorite = favorites.some(m => m.url === currentManga.url);
+            if (isFavorite) {
+                // Remove from favorites
+                favorites = favorites.filter(m => m.url !== currentManga.url);
+                favoriteButton.classList.remove('active');
+                favoriteButton.querySelector('.favorite-text').textContent = 'إضافة للمفضلة';
+            } else {
+                // Add to favorites
+                favorites.push(currentManga);
+                favoriteButton.classList.add('active');
+                favoriteButton.querySelector('.favorite-text').textContent = 'إزالة من المفضلة';
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        });
+
+        // Track read chapters
+        const readChapters = JSON.parse(localStorage.getItem('readChapters') || '[]');
+
+        document.querySelectorAll('.chapter-item').forEach(item => {
+            const chapterUrl = item.getAttribute('href');
+            const readLabel = item.querySelector('.read-label');
+            if (readChapters.includes(chapterUrl)) {
+                item.classList.add('read');
+                readLabel.style.display = 'inline';
+            } else {
+                readLabel.style.display = 'none';
+            }
+
+            item.addEventListener('click', () => {
+                if (!readChapters.includes(chapterUrl)) {
+                    readChapters.push(chapterUrl);
+                    localStorage.setItem('readChapters', JSON.stringify(readChapters));
+                }
+            });
+        });
+    </script>
+
+    <!-- Default Statcounter code for arabmanga arabmanga.dpdns.org -->
+    <script type="text/javascript">
+    var sc_project=13084401; 
+    var sc_invisible=1; 
+    var sc_security="2950abc6"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+    <noscript><div class="statcounter"><a title="web counter"
+    href="https://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="https://c.statcounter.com/13084401/0/2950abc6/1/"
+    alt="web counter"
+    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+    <!-- End of Statcounter Code -->
+</body>
+</html>

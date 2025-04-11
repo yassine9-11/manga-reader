@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قارئ المانجا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { 
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            min-height: 100vh;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            overflow-x: hidden;
+        }
+
+        body.light-mode {
+            background: #f5f5f5;
+        }
+
+        body.light-mode .reader-header {
+            background: rgba(245, 245, 245, 0.95);
+        }
+
+        body.light-mode .back-button,
+        body.light-mode .reader-button,
+        body.light-mode .nav-button {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        body.light-mode .back-button:hover,
+        body.light-mode .reader-button:hover,
+        body.light-mode .nav-button:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-mode .chapter-navigation {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .loading-placeholder {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .reader-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .reader-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button svg {
+            margin-left: 8px;
+            transform: scaleX(-1);
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(4px);
+        }
+
+        .reader-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .reader-button {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .reader-button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .reader-container {
+            max-width: 1000px;
+            margin: 60px auto 20px auto;
+            padding: 0;
+        }
+
+        .reader-container.fit-width {
+            max-width: 100%;
+        }
+
+        .reader-container.fit-width .page-img {
+            width: auto;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-container {
+            position: relative;
+            margin-bottom: 0;
+            min-height: 100px;
+        }
+
+        .page-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            will-change: transform, opacity;
+        }
+
+        .page-img.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .loading-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.05);
+            animation: pulse 1.5s infinite;
+        }
+
+        .chapter-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            gap: 10px;
+        }
+
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            border: none;
+            min-width: 140px;
+        }
+
+        .nav-button:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: rgba(255,255,255,0.1);
+            transform: none;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .reader-container {
+                padding: 10px;
+            }
+
+            .reader-controls {
+                gap: 10px;
+            }
+
+            .reader-button {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+
+            .chapter-navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Keyboard navigation */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .keyboard-hint.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="reader-header" id="header">
+        <a href="{{ url_for('manga_detail', manga_url=manga_url) }}" class="back-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            العودة
+        </a>
+        <div class="reader-controls">
+            <button class="reader-button" onclick="toggleFitWidth()">تغيير عرض الصفحة</button>
+            <button class="reader-button" onclick="toggleDarkMode()">تغيير المظهر</button>
+        </div>
+    </div>
+    <div class="reader-container" id="container">
+        {% for image in images %}
+        <div class="page-container">
+            <div class="loading-placeholder"></div>
+            <img class="page-img" 
+                 src="{{ image }}" 
+                 loading="lazy" 
+                 onload="this.classList.add('loaded')"
+                 alt="صفحة {{ loop.index }}">
+        </div>
+        {% endfor %}
+
+        <div class="chapter-navigation">
+            {% if next_chapter %}
+            <a href="{{ url_for('read_chapter', chapter_url=next_chapter.url) }}" class="nav-button">
+                <span>الفصل التالي</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            {% else %}
+            <button class="nav-button disabled" disabled>
+                <span>الفصل التالي</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            {% endif %}
+
+            <a href="{{ url_for('manga_detail', manga_url=manga_url) }}" class="nav-button">
+                <i class="fas fa-book"></i>
+                <span>العودة إلى المانجا</span>
+            </a>
+
+            {% if prev_chapter %}
+            <a href="{{ url_for('read_chapter', chapter_url=prev_chapter.url) }}" class="nav-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>الفصل السابق</span>
+            </a>
+            {% else %}
+            <button class="nav-button disabled" disabled>
+                <i class="fas fa-arrow-left"></i>
+                <span>الفصل السابق</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="keyboard-hint" id="keyboardHint">
+        استخدم مفاتيح الأسهم للتنقل بين الصفحات
+    </div>
+
+    <script>
+        // Auto-hide header
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const keyboardHint = document.getElementById('keyboardHint');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            lastScrollTop = scrollTop;
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && typeof nextChapterUrl !== 'undefined') {
+                window.location.href = nextChapterUrl;
+            }
+            if (e.key === 'ArrowLeft' && typeof prevChapterUrl !== 'undefined') {
+                window.location.href = prevChapterUrl;
+            }
+        });
+
+        // Show keyboard hint on first visit
+        if (!localStorage.getItem('keyboardHintShown')) {
+            keyboardHint.classList.add('visible');
+            setTimeout(() => {
+                keyboardHint.classList.remove('visible');
+            }, 3000);
+            localStorage.setItem('keyboardHintShown', 'true');
+        }
+
+        // Page width toggle
+        function toggleFitWidth() {
+            const container = document.getElementById('container');
+            container.classList.toggle('fit-width');
+            localStorage.setItem('fitWidth', container.classList.contains('fit-width'));
+        }
+
+        // Theme toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        // Restore saved preferences
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restore page width preference
+            if (localStorage.getItem('fitWidth') === 'true') {
+                document.getElementById('container').classList.add('fit-width');
+            }
+
+            // Restore theme preference
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        });
+    </script>
+    {% if next_chapter %}
+    <script>
+        const nextChapterUrl = "{{ url_for('read_chapter', chapter_url=next_chapter.url) }}";
+    </script>
+    {% endif %}
+    {% if prev_chapter %}
+    <script>
+        const prevChapterUrl = "{{ url_for('read_chapter', chapter_url=prev_chapter.url) }}";
+    </script>
+    {% endif %}
+
+    <!-- Default Statcounter code for arabmanga arabmanga.dpdns.org -->
+    <script type="text/javascript">
+    var sc_project=13084401; 
+    var sc_invisible=1; 
+    var sc_security="2950abc6"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+    <noscript><div class="statcounter"><a title="web counter"
+    href="https://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="https://c.statcounter.com/13084401/0/2950abc6/1/"
+    alt="web counter"
+    referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+    <!-- End of Statcounter Code -->
+</body>
+</html>
