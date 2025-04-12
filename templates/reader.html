@@ -253,6 +253,21 @@
         .keyboard-hint.visible {
             opacity: 1;
         }
+
+        /* Add styles for lazy loading */
+        .page-img[data-src] {
+            opacity: 0;
+        }
+
+        .page-img.lazy {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .page-img.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -272,10 +287,11 @@
         {% for image in images %}
         <div class="page-container">
             <div class="loading-placeholder"></div>
-            <img class="page-img" 
-                 src="{{ image }}" 
-                 onload="this.classList.add('loaded')"
-                 alt="صفحة {{ loop.index }}">
+            {% if loop.first %}
+            <img class="page-img" src="{{ image }}" alt="Page {{ loop.index }}" loading="eager" onload="this.classList.add('loaded'); this.parentElement.querySelector('.loading-placeholder').style.display = 'none';">
+            {% else %}
+            <img class="page-img lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="{{ image }}" alt="Page {{ loop.index }}" loading="lazy">
+            {% endif %}
         </div>
         {% endfor %}
 
@@ -374,6 +390,62 @@
             if (localStorage.getItem('theme') === 'light') {
                 document.body.classList.add('light-mode');
             }
+        });
+
+        // Add lazy loading with preloading functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const lazyImages = [].slice.call(document.querySelectorAll('img.lazy'));
+            let activeIndex = 0;
+            
+            if ('IntersectionObserver' in window) {
+                let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            let lazyImage = entry.target;
+                            loadImage(lazyImage);
+                            lazyImageObserver.unobserve(lazyImage);
+                            
+                            // Preload next 2 images
+                            const currentIndex = lazyImages.indexOf(lazyImage);
+                            preloadNextImages(currentIndex);
+                        }
+                    });
+                });
+
+                lazyImages.forEach(function(lazyImage) {
+                    lazyImageObserver.observe(lazyImage);
+                });
+            }
+
+            function loadImage(img) {
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                    img.addEventListener('load', function() {
+                        img.classList.add('loaded');
+                        img.parentElement.querySelector('.loading-placeholder').style.display = 'none';
+                    });
+                }
+            }
+
+            function preloadNextImages(currentIndex) {
+                for (let i = 1; i <= 2; i++) {
+                    const nextIndex = currentIndex + i;
+                    if (nextIndex < lazyImages.length) {
+                        const nextImage = lazyImages[nextIndex];
+                        if (nextImage.dataset.src) {
+                            const preloadLink = document.createElement('link');
+                            preloadLink.rel = 'preload';
+                            preloadLink.as = 'image';
+                            preloadLink.href = nextImage.dataset.src;
+                            document.head.appendChild(preloadLink);
+                        }
+                    }
+                }
+            }
+
+            // Preload first two images after the eager one
+            preloadNextImages(0);
         });
     </script>
     {% if next_chapter %}

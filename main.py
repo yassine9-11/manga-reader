@@ -120,10 +120,10 @@ def scrape_manga_details(url):
     
     # Basic details
     title_element = soup.select_one("div.post-title h1")
-    arabic_title = title_element.text.strip()
+    arabic_title = title_element.text.strip() if title_element else ''
     
     # Try to find English title in alternative titles section
-    alternative_titles_div = soup.select_one("div.post-content_item:has(div.summary-heading:contains('عناوين أخرى'))")
+    alternative_titles_div = soup.select_one("div.post-content_item:-soup-contains('عناوين أخرى')")
     english_title = None
     if alternative_titles_div:
         alternative_titles = alternative_titles_div.select_one("div.summary-content").text.strip()
@@ -132,8 +132,11 @@ def scrape_manga_details(url):
         if english_match:
             english_title = english_match.group(1).strip()
     
-    thumbnail = soup.select_one("div.summary_image img")['src']
-    description = soup.select_one("div.description-summary div.summary__content").text.strip()
+    thumbnail = soup.select_one("div.summary_image img")
+    thumbnail_url = thumbnail['src'] if thumbnail else ''
+    
+    description_div = soup.select_one("div.description-summary div.summary__content")
+    description = description_div.text.strip() if description_div else ''
     
     # Metadata
     genres = [a.text.strip() for a in soup.select("div.genres-content a")]
@@ -143,7 +146,7 @@ def scrape_manga_details(url):
     chapter_items = soup.select("li.wp-manga-chapter")
     for chapter in chapter_items:
         link = chapter.select_one("a")
-        if link:
+        if link and link.get('href'):
             # Extract the chapter path from the full URL
             chapter_path = link['href'].split('lekmanga.net/')[-1].strip('/')
             # Create a clean chapter URL
@@ -156,7 +159,7 @@ def scrape_manga_details(url):
     return {
         'title': arabic_title,
         'english_title': english_title,
-        'thumbnail': thumbnail,
+        'thumbnail': thumbnail_url,
         'description': description,
         'genres': genres,
         'chapters': chapters
@@ -280,6 +283,9 @@ def read_chapter(chapter_url):
         # Scrape chapter images
         images = scrape_chapter_images(full_chapter_url)
         
+        if not images:
+            return "No images found for this chapter", 404
+
         template = 'mobile/reader.html' if is_mobile_device(request.user_agent.string) else 'reader.html'
         return render_template(template, 
                              images=images,
