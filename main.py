@@ -1,71 +1,10 @@
-from flask import Flask, render_template, jsonify, request, redirect, make_response
+from flask import Flask, render_template, jsonify, request, redirect
 import requests
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urljoin, urlparse
-import json
-import os
-import uuid
-from datetime import datetime, timezone
-import platform
 
 app = Flask(__name__)
-
-# User data management
-USER_DATA_DIR = 'user_data'
-if not os.path.exists(USER_DATA_DIR):
-    os.makedirs(USER_DATA_DIR)
-
-def get_current_time():
-    return datetime.now(timezone.utc).strftime('%Y-%m-%d/%H:%M')
-
-def get_user_data_file(device_id):
-    return os.path.join(USER_DATA_DIR, f'{device_id}.json')
-
-def get_device_type(user_agent):
-    if is_mobile_device(user_agent):
-        return 'android'
-    else:
-        # Check for common desktop OS identifiers
-        user_agent = user_agent.lower()
-        if 'windows' in user_agent:
-            return 'windows'
-        elif 'macintosh' in user_agent or 'mac os' in user_agent:
-            return 'mac'
-        elif 'linux' in user_agent:
-            return 'linux'
-        else:
-            return 'desktop'
-
-def load_user_data(device_id):
-    file_path = get_user_data_file(device_id)
-    current_time = get_current_time()
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {
-        'device_id': device_id,
-        'device_type': get_device_type(request.user_agent.string),
-        'device_name': platform.node() if not is_mobile_device(request.user_agent.string) else 'android device',
-        'created_at': current_time,
-        'last_active': current_time,
-        'visit_count': 0,
-        'chapters_read': 0,
-        'favorite_mangas': [],
-        'reading_history': []
-    }
-
-def save_user_data(data):
-    file_path = get_user_data_file(data['device_id'])
-    data['last_active'] = get_current_time()
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-def get_or_create_device_id():
-    device_id = request.cookies.get('device_id')
-    if not device_id:
-        device_id = str(uuid.uuid4())
-    return device_id
 
 def is_mobile_device(user_agent):
     mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
@@ -275,23 +214,9 @@ def home():
     query = request.args.get('q', '')
     mangas = scrape_manga_list(query if query else None)
     template = 'mobile/index.html' if is_mobile_device(request.user_agent.string) else 'index.html'
-    
-    # Handle user data
-    device_id = get_or_create_device_id()
-    user_data = load_user_data(device_id)
-    current_time = get_current_time()
-    
-    # Update visit information
-    user_data['last_active'] = current_time
-    user_data['visit_count'] += 1
-    save_user_data(user_data)
-    
-    response = make_response(render_template(template, 
-                                          mangas=mangas,
-                                          query=query,
-                                          user_data=user_data))
-    response.set_cookie('device_id', device_id, max_age=31536000)  # 1 year expiry
-    return response
+    return render_template(template, 
+                         mangas=mangas,
+                         query=query)
 
 @app.route('/search')
 def search():
@@ -319,16 +244,10 @@ def manga_detail(manga_url):
     
     details = scrape_manga_details(fixed_url)
     
-    # Handle user data
-    device_id = get_or_create_device_id()
-    user_data = load_user_data(device_id)
-    
-    # Check if manga is in favorites
-    details['is_favorite'] = manga_slug in [m['slug'] for m in user_data['favorite_mangas']]
-    
+    # Pass the clean URL to the template
     clean_manga_url = f"manga/{manga_slug}"
     template = 'mobile/manga.html' if is_mobile_device(request.user_agent.string) else 'manga.html'
-    return render_template(template, manga=details, manga_url=clean_manga_url, user_data=user_data)
+    return render_template(template, manga=details, manga_url=clean_manga_url)
 
 @app.route('/read/<path:chapter_url>')
 def read_chapter(chapter_url):
@@ -367,81 +286,20 @@ def read_chapter(chapter_url):
         if not images:
             return "No images found for this chapter", 404
 
-        # Handle user data
-        device_id = get_or_create_device_id()
-        user_data = load_user_data(device_id)
-        
-        # Update chapters read count
-        user_data['chapters_read'] += 1
-        
-        # Create new history entry
-        history_entry = {
-            'manga_slug': manga_slug,
-            'chapter_url': chapter_url,
-            'timestamp': get_current_time()
-        }
-        
-        # Remove old entry for this manga if it exists and add new one
-        user_data['reading_history'] = [entry for entry in user_data['reading_history'] 
-                                      if entry['manga_slug'] != manga_slug]
-        user_data['reading_history'].append(history_entry)
-        
-        # Save updated user data
-        save_user_data(user_data)
-        
         template = 'mobile/reader.html' if is_mobile_device(request.user_agent.string) else 'reader.html'
         return render_template(template, 
                              images=images,
                              manga_url=manga_url,
                              prev_chapter=prev_chapter,
-                             next_chapter=next_chapter,
-                             user_data=user_data)
+                             next_chapter=next_chapter)
     except Exception as e:
         print(f"Error reading chapter: {str(e)}")
         return "Error reading chapter", 500
 
 @app.route('/favorites')
 def favorites():
-    device_id = get_or_create_device_id()
-    user_data = load_user_data(device_id)
     template = 'mobile/favorites.html' if is_mobile_device(request.user_agent.string) else 'favorites.html'
-    return render_template(template, user_data=user_data)
-
-@app.route('/api/toggle_favorite', methods=['POST'])
-def toggle_favorite():
-    try:
-        device_id = get_or_create_device_id()
-        user_data = load_user_data(device_id)
-        
-        data = request.get_json()
-        manga_slug = data.get('manga_slug')
-        manga_title = data.get('manga_title')
-        manga_thumbnail = data.get('manga_thumbnail')
-        
-        if not manga_slug:
-            return jsonify({'error': 'Missing manga_slug'}), 400
-            
-        # Find if manga is already in favorites
-        existing_favorites = [m for m in user_data['favorite_mangas'] if m['slug'] == manga_slug]
-        
-        if existing_favorites:
-            # Remove from favorites
-            user_data['favorite_mangas'] = [m for m in user_data['favorite_mangas'] if m['slug'] != manga_slug]
-            is_favorite = False
-        else:
-            # Add to favorites
-            user_data['favorite_mangas'].append({
-                'slug': manga_slug,
-                'title': manga_title,
-                'thumbnail': manga_thumbnail,
-                'added_at': get_current_time()
-            })
-            is_favorite = True
-            
-        save_user_data(user_data)
-        return jsonify({'success': True, 'is_favorite': is_favorite})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return render_template(template)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
