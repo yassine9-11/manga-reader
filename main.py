@@ -301,5 +301,9 @@ def favorites():
     template = 'mobile/favorites.html' if is_mobile_device(request.user_agent.string) else 'favorites.html'
     return render_template(template)
 
+@app.route('/ads.txt')
+def ads_txt():
+    return 'google.com, pub-5348286475991825, DIRECT, f08c47fec0942fa0', 200, {'Content-Type': 'text/plain'}
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
