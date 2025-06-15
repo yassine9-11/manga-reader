@@ -83,7 +83,7 @@ def search_manga(query, page=1):
                     # For API results, try to get the thumbnail from manga details
                     full_url = item.get('url', '')
                     # Extract the manga slug from the full URL
-                    manga_slug = full_url.split('manga/')[-1].strip('/')
+                    manga_slug = full_url.split('series/')[-1].strip('/')
                     # Create a clean URL without any domain information
                     clean_url = manga_slug
                     
@@ -148,7 +148,7 @@ def scrape_manga_details(url):
         link = chapter.select_one("a")
         if link and link.get('href'):
             # Extract the chapter path from the full URL
-            chapter_path = link['href'].split('lekmanga.net/')[-1].strip('/')
+            chapter_path = link['href'].split('azoramoon.com/')[-1].strip('/')
             # Create a clean chapter URL
             clean_chapter_url = chapter_path
             chapters.append({
