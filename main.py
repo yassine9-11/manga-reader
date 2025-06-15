@@ -252,44 +252,47 @@ def manga_detail(manga_url):
 @app.route('/read/<path:chapter_url>')
 def read_chapter(chapter_url):
     try:
-        # Validate the chapter URL
-        if not chapter_url or not chapter_url.startswith('manga/'):
+        # Accept both 'manga/' and 'series/' chapter URLs
+        if not chapter_url or not (chapter_url.startswith('manga/') or chapter_url.startswith('series/')):
             return "Invalid chapter URL", 400
-            
+
         # Construct the full URL for scraping
         full_chapter_url = f"https://azoramoon.com/{chapter_url}"
-        
-        # Extract manga slug from chapter path
-        manga_slug = chapter_url.split('/')[1]  # Get the manga slug from the path
-        
+
+        # Extract manga slug based on the URL structure
+        parts = chapter_url.split('/')
+        if len(parts) > 2 and parts[0] in ['manga', 'series']:
+            manga_slug = parts[1]
+        else:
+            return "Invalid chapter URL format", 400
+
         # Get manga details to find the current chapter index
-        manga_url = f"{manga_slug}"
         manga_details = scrape_manga_details(f"https://azoramoon.com/series/{manga_slug}/")
-        
-        # Find current chapter index
+
+        # Find current chapter index by matching chapter URL
         current_chapter_index = None
         for i, chapter in enumerate(manga_details['chapters']):
             if chapter['url'] == chapter_url:
                 current_chapter_index = i
                 break
-        
+
         if current_chapter_index is None:
             return "Chapter not found", 404
-            
+
         # Get previous and next chapters
         prev_chapter = manga_details['chapters'][current_chapter_index + 1] if current_chapter_index + 1 < len(manga_details['chapters']) else None
         next_chapter = manga_details['chapters'][current_chapter_index - 1] if current_chapter_index > 0 else None
-        
+
         # Scrape chapter images
         images = scrape_chapter_images(full_chapter_url)
-        
+
         if not images:
             return "No images found for this chapter", 404
 
         template = 'mobile/reader.html' if is_mobile_device(request.user_agent.string) else 'reader.html'
         return render_template(template, 
                              images=images,
-                             manga_url=manga_url,
+                             manga_url=f"series/{manga_slug}",
                              prev_chapter=prev_chapter,
                              next_chapter=next_chapter)
     except Exception as e:
