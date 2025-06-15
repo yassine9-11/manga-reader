@@ -15,7 +15,7 @@ def scrape_manga_list(query=None):
     if query:
         return search_manga(query)
     
-    url = "https://lekmanga.net"
+    url = "https://azoramoon.com"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept-Language': 'ar,en;q=0.9,en-US;q=0.8'
@@ -69,7 +69,7 @@ def search_manga(query, page=1):
             'title': query
         }
         response = requests.post(
-            'https://lekmanga.net/wp-admin/admin-ajax.php',
+            'https://azoramoon.com/wp-admin/admin-ajax.php',
             data=data,
             headers=headers
         )
@@ -171,7 +171,7 @@ def scrape_chapter_images(url):
         parsed_url = urlparse(url)
         if not parsed_url.netloc:
             # If no host, assume it's lekmanga.net
-            url = f"https://lekmanga.net{'/'+url.lstrip('/') if not url.startswith('/') else url}"
+            url = f"https://azoramoon.com{'/'+url.lstrip('/') if not url.startswith('/') else url}"
         
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -239,8 +239,8 @@ def manga_detail(manga_url):
         manga_slug = manga_url.replace('manga/', '').strip('/')
     
     # Construct the full URL for scraping
-    base_url = "https://lekmanga.net"
-    fixed_url = f"{base_url}/manga/{manga_slug}/"
+    base_url = "https://azoramoon.com"
+    fixed_url = f"{base_url}/eries/{manga_slug}/"
     
     details = scrape_manga_details(fixed_url)
     
@@ -257,14 +257,14 @@ def read_chapter(chapter_url):
             return "Invalid chapter URL", 400
             
         # Construct the full URL for scraping
-        full_chapter_url = f"https://lekmanga.net/{chapter_url}"
+        full_chapter_url = f"https://azoramoon.com/{chapter_url}"
         
         # Extract manga slug from chapter path
         manga_slug = chapter_url.split('/')[1]  # Get the manga slug from the path
         
         # Get manga details to find the current chapter index
         manga_url = f"{manga_slug}"
-        manga_details = scrape_manga_details(f"https://lekmanga.net/manga/{manga_slug}/")
+        manga_details = scrape_manga_details(f"https://azoramoon.com/series/{manga_slug}/")
         
         # Find current chapter index
         current_chapter_index = None
