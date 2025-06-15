@@ -240,12 +240,12 @@ def manga_detail(manga_url):
     
     # Construct the full URL for scraping
     base_url = "https://azoramoon.com"
-    fixed_url = f"{base_url}/eries/{manga_slug}/"
+    fixed_url = f"{base_url}/series/{manga_slug}/"
     
     details = scrape_manga_details(fixed_url)
     
     # Pass the clean URL to the template
-    clean_manga_url = f"manga/{manga_slug}"
+    clean_manga_url = f"series/{manga_slug}"
     template = 'mobile/manga.html' if is_mobile_device(request.user_agent.string) else 'manga.html'
     return render_template(template, manga=details, manga_url=clean_manga_url)
 
