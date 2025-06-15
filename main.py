@@ -34,7 +34,7 @@ def scrape_manga_list(query=None):
         title = title_elem.text.strip()
         full_url = title_elem['href']
         # Extract the manga slug from the full URL
-        manga_slug = full_url.split('manga/')[-1].strip('/')
+        manga_slug = full_url.split('series/')[-1].strip('/')
         # Create a clean URL without any domain information
         clean_url = manga_slug
         
