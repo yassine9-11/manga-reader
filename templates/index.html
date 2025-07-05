@@ -407,6 +407,44 @@
     alt="web counter"
     referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
     <!-- End of Statcounter Code -->
+    <script>
+      window.addEventListener("load", function () {
+        if (!sessionStorage.getItem("alertShown")) {
+          const modal = document.createElement("div");
+          modal.style.position = "fixed";
+          modal.style.top = "0";
+          modal.style.left = "0";
+          modal.style.width = "100vw";
+          modal.style.height = "100vh";
+          modal.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+          modal.style.display = "flex";
+          modal.style.flexDirection = "column";
+          modal.style.alignItems = "center";
+          modal.style.justifyContent = "center";
+          modal.style.zIndex = "9999";
+          modal.style.fontFamily = "Tahoma, sans-serif";
+    
+          modal.innerHTML = `
+            <div style="background: #1e1e1e; color: #fff; padding: 25px 20px; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+              <h2 style="color: #ff5555; font-weight: bold;">⚠️ تنبيه</h2>
+              <p style="margin: 15px 0; font-size: 16px;">هذا الموقع قديم وقد لا يعمل بشكل صحيح.</p>
+              <p style="margin-bottom: 20px; font-size: 15px;">نوصي باستخدام الموقع الجديد للاستمتاع بتجربة أفضل.</p>
+              <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button onclick="window.location.href='https://manhwaspot.dpdns.org/'"
+                        style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-size: 15px; cursor: pointer;">
+                  الذهاب إلى الموقع الجديد
+                </button>
+                <button onclick="document.body.removeChild(this.parentNode.parentNode); sessionStorage.setItem('alertShown', 'true')"
+                        style="padding: 10px 20px; background-color: #444; color: #ccc; border: none; border-radius: 6px; font-size: 15px; cursor: pointer;">
+                  البقاء في الموقع القديم
+                </button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(modal);
+        }
+      });
+    </script>
 
     <!-- Vercel Analytics -->
     <script>
